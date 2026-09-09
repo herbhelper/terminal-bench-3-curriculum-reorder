@@ -1,0 +1,1 @@
+"""Curriculum ordering service."""

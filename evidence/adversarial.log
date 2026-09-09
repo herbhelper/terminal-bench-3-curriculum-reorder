@@ -1,0 +1,17 @@
+REJECTED  delete-reinsert  (reward 0)
+    caught by: test_the_audit_records_only_the_lessons_that_actually_moved
+    caught by: test_a_move_preserves_lesson_identity
+
+REJECTED  drop-constraint  (reward 0)
+    caught by: test_uniqueness_constraint_is_intact_and_still_deferrable
+    caught by: test_the_constraint_is_still_enforced
+
+REJECTED  fix-the-reported-case  (reward 0)
+    caught by: test_move_into_another_section
+    caught by: test_a_move_preserves_lesson_identity
+
+REJECTED  negative-parking  (reward 0)
+    caught by: test_the_audit_records_only_the_lessons_that_actually_moved
+    caught by: test_a_lesson_moved_to_its_own_position_is_not_audited
+
+all adversarial variants rejected

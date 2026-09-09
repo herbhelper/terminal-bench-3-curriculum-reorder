@@ -1,7 +1,8 @@
 # Terminal-Bench 3 task submission — `curriculum-reorder-integrity`
 
-A single [Terminal-Bench 3](https://github.com/harbor-framework/terminal-bench-3)
-task in the Harbor task format, written to be hard for a frontier coding agent
+A single [Terminal-Bench](https://github.com/harbor-framework/terminal-bench)
+task in the Harbor task format, built to the schema and conventions of the 66
+tasks currently merged into that repository, written to be hard for a frontier coding agent
 and, more to the point, written so that the *wrong* fixes an agent actually
 reaches are graded as wrong.
 
@@ -23,10 +24,16 @@ all three of them.
 
 | | |
 |---|---|
-| Category | `software_engineering` |
+| Category | `Software` / `Databases` |
 | Environment | Ubuntu 24.04, PostgreSQL 16, Python 3.12 |
+| Verifier | separate container, 17 assertions, pytest, CTRF, binary reward |
 | Expert time estimate | 3 hours |
-| Verifier | 17 assertions, pytest, CTRF output, binary reward |
+| Schema | `2.0`, matching the merged tasks in `harbor-framework/terminal-bench` |
+
+The verifier runs in its own image and receives only the artifacts `task.toml`
+declares — the isolation every merged task uses. `run-local.sh` reproduces that
+without Harbor: it applies a candidate fix inside the agent container, copies
+the declared artifacts out, and grades them in the verifier container.
 
 ## Why it is hard
 
@@ -59,7 +66,7 @@ working implementation, and each one is run through the real verifier.
 | Run | Reward | |
 |---|---|---|
 | Oracle (`solution/solve.sh`) | **1** | 17/17 assertions pass |
-| Null agent (no changes) | **0** | 10 assertions fail |
+| Null agent (no changes) | **0** | 9 assertions fail |
 | `drop-constraint` | **0** | every behavioural assertion passes — caught only by the schema check |
 | `negative-parking` | **0** | ordering is perfect in every case — caught only by the audit trail |
 | `delete-reinsert` | **0** | ordering is perfect — caught by lesson identity |
@@ -69,8 +76,8 @@ Two of those catches are the whole point: a variant that is behaviourally
 flawless still scores zero, because the task's real requirement is an invariant
 the behaviour doesn't reveal.
 
-Captured output is in [`evidence/`](evidence/) — `oracle.log`,
-`null-agent.log`, `adversarial.log`.
+Captured output is in [`evidence/`](evidence/) — `null-and-oracle.log` and
+`adversarial.log`.
 
 ### The verifier was wrong once, too
 
@@ -87,7 +94,8 @@ adversarial suite is for: it found a hole in the grader, not in the task.
 ```
 tasks/curriculum-reorder-integrity/
 ├── instruction.md          # what the agent is told: three support reports
-├── task.toml               # Harbor metadata, difficulty and verification notes
+├── README.md               # difficulty, solution and verification write-up
+├── task.toml               # Harbor metadata and artifact declaration
 ├── environment/
 │   ├── Dockerfile          # Ubuntu 24.04 + PostgreSQL 16 + Python
 │   └── repo/               # the service under repair, as a git checkout
@@ -95,6 +103,7 @@ tasks/curriculum-reorder-integrity/
 │   ├── solve.sh            # oracle
 │   └── fixed/              # the reference implementation
 ├── tests/
+│   ├── Dockerfile          # the separate verifier image
 │   ├── test.sh             # verifier entrypoint, writes CTRF + reward
 │   └── test_state.py       # 17 assertions
 └── adversarial/            # four wrong fixes, each proven to score 0

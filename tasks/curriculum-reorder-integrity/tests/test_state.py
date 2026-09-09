@@ -6,8 +6,10 @@ Checks the three reported behaviours, the invariants the instruction states,
 and that the fix did not get there by weakening the database or by writing
 rows that the audit trail then has to explain.
 """
+import os
 import pathlib
 import subprocess
+import sys
 
 import psycopg2
 import pytest
@@ -295,8 +297,9 @@ def test_normalize_closes_a_gap_without_reordering(conn):
 
 def test_the_repos_own_suite_still_passes():
     result = subprocess.run(
-        ["python3", "-m", "pytest", "tests", "-q"],
+        [sys.executable, "-m", "pytest", "tests", "-q"],
         cwd="/app/curriculum",
+        env={**os.environ, "PYTHONPATH": "/app/curriculum"},
         capture_output=True,
         text=True,
     )

@@ -1,0 +1,90 @@
+── build ─────────────────────────────────────────────
+built tb3-local/curriculum-reorder-integrity-env and tb3-local/curriculum-reorder-integrity-verifier
+
+── null ────────────────────────────────────────────
+
+conn = <connection object at 0x7a922b478e00; dsn: 'user=curriculum password=xxx dbname=curriculum host=127.0.0.1', closed: 0>
+
+    def test_import_leaves_the_section_dense_and_in_order(conn):
+        section = sid(conn, "Execution")
+        before = titles(conn, section)
+        importer.import_batch(conn, section, EXPORT)
+>       assert positions(conn, section) == [1, 2, 3, 4, 5, 6]
+E       AssertionError: assert [1, 2, 4, 5, 6, 7] == [1, 2, 3, 4, 5, 6]
+E         
+E         At index 2 diff: 4 != 3
+E         
+E         Full diff:
+E           [
+E               1,
+E               2,...
+E         
+E         ...Full output truncated (6 lines hidden), use '-vv' to show
+
+tests/test_state.py:275: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_state.py::test_the_shipped_schema_still_declares_the_constraint_deferrable
+PASSED tests/test_state.py::test_uniqueness_constraint_is_intact_and_still_deferrable
+PASSED tests/test_state.py::test_the_constraint_is_still_enforced
+PASSED tests/test_state.py::test_audit_trigger_and_table_survive
+PASSED tests/test_state.py::test_move_up_inside_a_section
+PASSED tests/test_state.py::test_import_defaults_the_columns_a_record_omits
+PASSED tests/test_state.py::test_normalize_closes_a_gap_without_reordering
+PASSED tests/test_state.py::test_the_repos_own_suite_still_passes
+FAILED tests/test_state.py::test_move_down_inside_a_section - psycopg2.errors...
+FAILED tests/test_state.py::test_move_into_another_section - psycopg2.errors....
+FAILED tests/test_state.py::test_the_audit_records_only_the_lessons_that_actually_moved
+FAILED tests/test_state.py::test_a_lesson_moved_to_its_own_position_is_not_audited
+FAILED tests/test_state.py::test_a_move_preserves_lesson_identity - psycopg2....
+FAILED tests/test_state.py::test_append_uses_the_section_and_not_the_table - ...
+FAILED tests/test_state.py::test_append_into_an_empty_section - AssertionErro...
+FAILED tests/test_state.py::test_import_keeps_the_values_a_record_does_carry
+FAILED tests/test_state.py::test_import_leaves_the_section_dense_and_in_order
+========================= 9 failed, 8 passed in 1.06s ==========================
+reward(null) = 0
+
+── oracle ────────────────────────────────────────────
+collecting ... collected 17 items
+
+tests/test_state.py::test_the_shipped_schema_still_declares_the_constraint_deferrable PASSED [  5%]
+tests/test_state.py::test_uniqueness_constraint_is_intact_and_still_deferrable PASSED [ 11%]
+tests/test_state.py::test_the_constraint_is_still_enforced PASSED        [ 17%]
+tests/test_state.py::test_audit_trigger_and_table_survive PASSED         [ 23%]
+tests/test_state.py::test_move_up_inside_a_section PASSED                [ 29%]
+tests/test_state.py::test_move_down_inside_a_section PASSED              [ 35%]
+tests/test_state.py::test_move_into_another_section PASSED               [ 41%]
+tests/test_state.py::test_the_audit_records_only_the_lessons_that_actually_moved PASSED [ 47%]
+tests/test_state.py::test_a_lesson_moved_to_its_own_position_is_not_audited PASSED [ 52%]
+tests/test_state.py::test_a_move_preserves_lesson_identity PASSED        [ 58%]
+tests/test_state.py::test_append_uses_the_section_and_not_the_table PASSED [ 64%]
+tests/test_state.py::test_append_into_an_empty_section PASSED            [ 70%]
+tests/test_state.py::test_import_defaults_the_columns_a_record_omits PASSED [ 76%]
+tests/test_state.py::test_import_keeps_the_values_a_record_does_carry PASSED [ 82%]
+tests/test_state.py::test_import_leaves_the_section_dense_and_in_order PASSED [ 88%]
+tests/test_state.py::test_normalize_closes_a_gap_without_reordering PASSED [ 94%]
+tests/test_state.py::test_the_repos_own_suite_still_passes PASSED        [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_state.py::test_the_shipped_schema_still_declares_the_constraint_deferrable
+PASSED tests/test_state.py::test_uniqueness_constraint_is_intact_and_still_deferrable
+PASSED tests/test_state.py::test_the_constraint_is_still_enforced
+PASSED tests/test_state.py::test_audit_trigger_and_table_survive
+PASSED tests/test_state.py::test_move_up_inside_a_section
+PASSED tests/test_state.py::test_move_down_inside_a_section
+PASSED tests/test_state.py::test_move_into_another_section
+PASSED tests/test_state.py::test_the_audit_records_only_the_lessons_that_actually_moved
+PASSED tests/test_state.py::test_a_lesson_moved_to_its_own_position_is_not_audited
+PASSED tests/test_state.py::test_a_move_preserves_lesson_identity
+PASSED tests/test_state.py::test_append_uses_the_section_and_not_the_table
+PASSED tests/test_state.py::test_append_into_an_empty_section
+PASSED tests/test_state.py::test_import_defaults_the_columns_a_record_omits
+PASSED tests/test_state.py::test_import_keeps_the_values_a_record_does_carry
+PASSED tests/test_state.py::test_import_leaves_the_section_dense_and_in_order
+PASSED tests/test_state.py::test_normalize_closes_a_gap_without_reordering
+PASSED tests/test_state.py::test_the_repos_own_suite_still_passes
+============================== 17 passed in 1.08s ==============================
+reward(oracle) = 1
+
+OK

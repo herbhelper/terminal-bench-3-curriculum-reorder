@@ -6,8 +6,10 @@
 # grader rejects a solution that is wrong in a way a competent agent would
 # actually be wrong.
 #
-# This runs each variant in adversarial/ through the real verifier and requires
-# a reward of 0, then prints the assertions that caught it.
+# Each variant in adversarial/ is a complete working implementation applied
+# inside the agent container. The declared artifacts are then copied out and
+# graded by the real verifier image, exactly as in run-local.sh. Each must
+# score 0.
 #
 # usage: ./verify-traps.sh <task-name>
 set -uo pipefail
@@ -15,25 +17,33 @@ set -uo pipefail
 TASK=${1:?usage: verify-traps.sh <task-name>}
 ROOT=$(cd "$(dirname "$0")" && pwd)
 DIR="$ROOT/tasks/$TASK"
-IMAGE="tb3-local/$TASK"
+ENV_IMAGE="tb3-local/$TASK-env"
+VERIFIER_IMAGE="tb3-local/$TASK-verifier"
 
-docker build -q -t "$IMAGE" "$DIR/environment" >/dev/null
+docker build -q -t "$ENV_IMAGE" "$DIR/environment" >/dev/null
+docker build -q -t "$VERIFIER_IMAGE" "$DIR/tests" >/dev/null
 
 fails=0
 for variant in "$DIR"/adversarial/*/; do
     name=$(basename "$variant")
-    logs=$(mktemp -d); mkdir -p "$logs/verifier"
+    work=$(mktemp -d); logs=$(mktemp -d); mkdir -p "$logs/verifier"
 
-    out=$(docker run --rm \
-        -v "$DIR/tests:/tests:ro" \
+    cid=$(docker run -d --rm \
         -v "$DIR/solution:/solution:ro" \
         -v "$DIR/adversarial:/adversarial:ro" \
+        "$ENV_IMAGE" sleep infinity)
+    docker exec "$cid" bash "/adversarial/$name/apply.sh" >/dev/null
+    docker cp "$cid:/app/curriculum" "$work/curriculum" >/dev/null
+    docker kill "$cid" >/dev/null
+
+    out=$(docker run --rm \
+        -v "$work/curriculum:/app/curriculum" \
         -v "$logs:/logs" \
-        "$IMAGE" bash -c "/adversarial/$name/apply.sh >/dev/null && /tests/test.sh" 2>&1)
+        "$VERIFIER_IMAGE" bash /tests/test.sh 2>&1)
 
     reward=$(cat "$logs/verifier/reward.txt" 2>/dev/null || echo "-")
     caught=$(echo "$out" | grep -E '^FAILED' | sed 's#.*test_state.py::#    caught by: #' | sed 's/ -.*//')
-    rm -rf "$logs"
+    rm -rf "$work" "$logs"
 
     if [ "$reward" = "0" ]; then
         echo "REJECTED  $name  (reward 0)"
